@@ -1,0 +1,46 @@
+# ================================================================
+# PR Check Workflow
+# 当向 main 分支发起 Pull Request 时自动触发
+# 依次执行 lint、类型检查、单元测试，全部通过后 PR 才可合并
+# ================================================================
+
+name: PR Check
+
+# 触发条件：当 PR 目标分支为 main 时，在以下动作发生时触发
+on:
+  pull_request:
+    branches: [main]
+    # opened: PR 被创建时
+    # synchronize: PR 分支有新的代码推送时
+    # reopened: PR 被重新打开时
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check:
+    # 运行环境：使用最新的 Ubuntu 系统
+    runs-on: ubuntu-latest
+
+    steps:
+      # 步骤1：检出代码到工作目录
+      - uses: actions/checkout@v4
+
+      # 步骤2：安装 Node.js 环境，并启用 npm 缓存加速依赖安装
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # 步骤3：安装项目依赖（ci 模式，严格按照 lock 文件安装）
+      - run: npm ci
+
+      # 步骤4：代码规范检查（ESLint 等）
+      - name: Lint
+        run: npm run lint
+
+      # 步骤5：TypeScript 类型检查，确保无类型错误
+      - name: Type Check
+        run: npm run ts
+
+      # 步骤6：运行单元测试，确保功能正确
+      - name: Unit Test
+        run: npm run jest
