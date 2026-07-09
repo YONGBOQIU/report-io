@@ -1,8 +1,4 @@
-<script setup>
-function test() {
-  a = b;
-  console.log('test')
-}
+<script setup lang="ts">
 </script>
 
 <template>
